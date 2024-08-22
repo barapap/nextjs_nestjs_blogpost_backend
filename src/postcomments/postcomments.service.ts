@@ -16,8 +16,9 @@ export class PostcommentsService {
 
   // Create a new blog post's comment
   async create(createCommentDto: CreatePostcommentDto, user: any, postId: number) {
-    const user_id = user.id; // User ID from the request context
-  
+    const user_id = user.id; 
+    createCommentDto.post_id = postId;
+    createCommentDto.user_id = user_id;
     try {
       const result = await this.conn.insert(blogcomments).values({
         ...createCommentDto

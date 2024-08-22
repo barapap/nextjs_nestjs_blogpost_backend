@@ -6,14 +6,15 @@ import { LoginDto } from './dto/login.dto';
 import { users } from '../drizzle-db/schema'; 
 import * as schema from '../drizzle-db/schema';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
 import { PG_CONNECTION } from 'src/constants';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtSecret = process.env.JWT_SECRET || 'default_jwt_secret';
+  private readonly jwtSecret = "test123";
 
   constructor(
+    private jwtService: JwtService,
     @Inject(PG_CONNECTION) private conn: NodePgDatabase<typeof schema>,
   ) {}
 
@@ -53,13 +54,22 @@ export class AuthService {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ id: user.id, username: user.username }, this.jwtSecret, { expiresIn: '1h' });
+    const token = this.jwtService.sign({ 
+      id: user.id, 
+      username: user.username 
+  });
     return { access_token: token };
   }
 
   async validateToken(token: string) {
     try {
-      return jwt.verify(token, this.jwtSecret);
+      // verify function takes two params
+      return this.jwtService.verify(
+        // one is the token
+        token, 
+        // one is a object
+        {secret: this.jwtSecret}
+      );
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }

@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CreateBlogpostDto } from './dto/create-blogpost.dto';
 import { UpdateBlogpostDto } from './dto/update-blogpost.dto';
-import { blogposts } from '../drizzle-db/schema';
+import { posts } from '../drizzle-db/schema';
 import * as schema from '../drizzle-db/schema';
 import { eq } from 'drizzle-orm';
 import { PG_CONNECTION } from 'src/constants';
@@ -17,11 +17,10 @@ export class BlogPostsService {
   // Create a new blog post
   create(createBlogPostDto: CreateBlogpostDto, user: any) {
     const author_id = user.id; 
-  
+    createBlogPostDto.author_id = author_id;
     try {
-      const result = this.conn.insert(blogposts).values({
+      const result = this.conn.insert(posts).values({
         ...createBlogPostDto,
-        
       }).returning();
       return result;
     } catch (error) {
@@ -32,12 +31,12 @@ export class BlogPostsService {
   
   // Find all blog posts
   async findAll() {
-    return await this.conn.query.blogposts.findMany();
+    return await this.conn.query.posts.findMany();
   }
 
   // Find one blog post by ID
   async findOne(id: number) {
-    const post = await this.conn.query.blogposts.findFirst({
+    const post = await this.conn.query.posts.findFirst({
       where: (posts, { eq }) => eq(posts.id, id),
     });
     if (!post) {
@@ -49,7 +48,7 @@ export class BlogPostsService {
   // Update blog post by ID
   async update(id: number, updateBlogPostDto: UpdateBlogpostDto, user: any) {
     // Find the post first
-    const post = await this.conn.query.blogposts.findFirst({
+    const post = await this.conn.query.posts.findFirst({
       where: (posts, { eq }) => eq(posts.id, id),
     });
 
@@ -65,12 +64,12 @@ export class BlogPostsService {
     const { title, content } = updateBlogPostDto;
 
     try {
-      const result = await this.conn.update(blogposts)
+      const result = await this.conn.update(posts)
         .set({
           ...(title && { title }),
           ...(content && { content }),
         })
-        .where(eq(blogposts.id, id))
+        .where(eq(posts.id, id))
         .returning();
 
       return result;
@@ -83,7 +82,7 @@ export class BlogPostsService {
   // Remove blog post by ID
   async remove(id: number, user: any) {
     // Find the post first
-    const post = await this.conn.query.blogposts.findFirst({
+    const post = await this.conn.query.posts.findFirst({
       where: (posts, { eq }) => eq(posts.id, id),
     });
 
@@ -97,7 +96,7 @@ export class BlogPostsService {
     }
 
     try {
-      await this.conn.delete(blogposts).where(eq(blogposts.id, id));
+      await this.conn.delete(posts).where(eq(posts.id, id));
       return { message: `Blog post with ID ${id} deleted` };
     } catch (error) {
       console.error('Error deleting blog post:', error);

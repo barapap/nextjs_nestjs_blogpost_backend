@@ -9,17 +9,11 @@ import { JwtAuthGuard } from './auth.guard';  // Import JwtAuthGuard
   imports: [
     DrizzleModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'default_jwt_secret',
-      signOptions: { 
-          algorithm: 'RS256',expiresIn: '1h' 
-        },
-      verifyOptions: {
-          algorithms: ['RS256'],
-        },
+      secret: "test123",
+      signOptions: {expiresIn: '1h'},
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard],  
-  exports: [AuthService, JwtAuthGuard],    // Export for use in other modules
 })
 export class AuthModule {}

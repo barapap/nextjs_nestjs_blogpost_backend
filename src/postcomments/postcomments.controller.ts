@@ -4,7 +4,7 @@ import { CreatePostcommentDto } from './dto/create-postcomment.dto';
 import { UpdatePostcommentDto } from './dto/update-postcomment.dto';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 
-@Controller('posts/:postId/comments')
+@Controller('api/posts/:postId/comments')
 @UseGuards(JwtAuthGuard)
 export class PostCommentsController {
   constructor(private readonly postCommentsService: PostcommentsService) {}

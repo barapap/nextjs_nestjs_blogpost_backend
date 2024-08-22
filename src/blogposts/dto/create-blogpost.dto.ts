@@ -6,4 +6,7 @@ export class CreateBlogpostDto {
 
   @IsString()
   content: string;
+
+  @IsString()
+  author_id: string;
 }
