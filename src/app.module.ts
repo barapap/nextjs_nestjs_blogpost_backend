@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { LoggingMiddleware } from './middleware/logging.middleware';
+import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
+import { CompressionMiddleware } from './middleware/compression.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogpostsModule } from './blogposts/blogposts.module';
@@ -21,4 +24,18 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggingMiddleware)
+      .forRoutes('*'); // Apply to all routes
+
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*'); 
+
+    consumer
+      .apply(CompressionMiddleware)
+      .forRoutes('*'); 
+  }
+}
