@@ -3,6 +3,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'Hello World!';
+    return 'Hi, congratulation, you are in a correct localhost number, now proceed to localhost:3000/api/auth/';
   }
 }
