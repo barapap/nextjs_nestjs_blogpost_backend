@@ -6,12 +6,11 @@ import { UpdateBlogpostDto } from './dto/update-blogpost.dto';
 import { posts } from '../drizzle-db/schema';
 import * as schema from '../drizzle-db/schema';
 import { eq } from 'drizzle-orm';
-import { PG_CONNECTION } from 'src/constants';
 
 @Injectable()
 export class BlogPostsService {
   constructor(
-    @Inject(PG_CONNECTION) private conn: NodePgDatabase<typeof schema>,
+    @Inject('PG_CONNECTION') private conn: NodePgDatabase<typeof schema>,
   ) {}
 
   // Create a new blog post

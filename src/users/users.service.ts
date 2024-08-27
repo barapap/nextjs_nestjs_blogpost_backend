@@ -1,5 +1,4 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PG_CONNECTION } from '../constants';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,7 +9,7 @@ import { eq } from 'drizzle-orm';
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(PG_CONNECTION) private conn: NodePgDatabase<typeof schema>,
+    @Inject('PG_CONNECTION') private conn: NodePgDatabase<typeof schema>,
   ) {}
 
   // Create a new user

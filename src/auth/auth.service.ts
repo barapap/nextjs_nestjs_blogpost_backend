@@ -6,7 +6,6 @@ import { LoginDto } from './dto/login.dto';
 import { users } from '../drizzle-db/schema'; 
 import * as schema from '../drizzle-db/schema';
 import * as bcrypt from 'bcrypt';
-import { PG_CONNECTION } from 'src/constants';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -15,7 +14,7 @@ export class AuthService {
 
   constructor(
     private jwtService: JwtService,
-    @Inject(PG_CONNECTION) private conn: NodePgDatabase<typeof schema>,
+    @Inject('PG_CONNECTION') private conn: NodePgDatabase<typeof schema>,
   ) {}
 
   async register(registerDto: RegisterDto) {

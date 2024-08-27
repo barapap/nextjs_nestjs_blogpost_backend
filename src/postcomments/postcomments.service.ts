@@ -6,12 +6,11 @@ import { UpdatePostcommentDto } from './dto/update-postcomment.dto';
 import { blogcomments } from '../drizzle-db/schema'; 
 import * as schema from '../drizzle-db/schema';
 import { eq } from 'drizzle-orm';
-import { PG_CONNECTION } from 'src/constants';
 
 @Injectable()
 export class PostcommentsService {
   constructor(
-    @Inject(PG_CONNECTION) private conn: NodePgDatabase<typeof schema>,
+    @Inject('PG_CONNECTION') private conn: NodePgDatabase<typeof schema>,
   ) {}
 
   // Create a new blog post's comment
