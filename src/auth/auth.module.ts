@@ -10,7 +10,7 @@ import { JwtAuthGuard } from './auth.guard';  // Import JwtAuthGuard
     DrizzleModule,
     JwtModule.register({
       secret: "test123",
-      signOptions: {expiresIn: '60s'},
+      signOptions: {expiresIn: '1200s'},
     }),
   ],
   controllers: [AuthController],

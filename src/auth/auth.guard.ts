@@ -29,7 +29,7 @@ export class JwtAuthGuard implements CanActivate {
       request.user = user;
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Auth Guard States Invalid token');
+      throw new UnauthorizedException('Auth Guard States Invalid token HahAHaa');
     }
   }
 }

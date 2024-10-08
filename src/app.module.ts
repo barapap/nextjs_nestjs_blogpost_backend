@@ -25,17 +25,18 @@ import { ConfigModule } from '@nestjs/config';
   providers: [AppService],
 })
 export class AppModule implements NestModule {
+  // Middleware order matters.
   configure(consumer: MiddlewareConsumer) {
+    consumer
+    .apply(CompressionMiddleware)
+    .forRoutes('*'); 
+
     consumer
       .apply(LoggingMiddleware)
       .forRoutes('*'); // Apply to all routes
 
     consumer
       .apply(RateLimitMiddleware)
-      .forRoutes('*'); 
-
-    consumer
-      .apply(CompressionMiddleware)
       .forRoutes('*'); 
   }
 }
