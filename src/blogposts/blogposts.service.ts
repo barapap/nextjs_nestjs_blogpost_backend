@@ -3,9 +3,9 @@ import { Inject } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CreateBlogpostDto } from './dto/create-blogpost.dto';
 import { UpdateBlogpostDto } from './dto/update-blogpost.dto';
-import { posts } from '../drizzle-db/schema';
+import { posts, blogcomments } from '../drizzle-db/schema';
 import * as schema from '../drizzle-db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 @Injectable()
 export class BlogPostsService {
@@ -33,10 +33,67 @@ export class BlogPostsService {
     return await this.conn.query.posts.findMany();
   }
 
+  // Find all posts with pagination
+  async findPaginated(offset: number, limit: number) {
+    try {
+      // Fetch the paginated posts
+      const posts = await this.conn.query.posts.findMany({
+        // Use limit and offset directly for pagination
+        limit: limit, // Limit the number of posts per page
+        offset: offset, // Skip a number of records to apply offset
+      });
+
+      // Fetch the total number of posts for pagination
+      const totalPosts = await this.conn.query.posts.findMany(); // Fetch all posts to count them
+      const totalPages = Math.ceil(totalPosts.length / limit); // Calculate total pages
+
+      return {
+        posts,
+        totalPages,
+      };
+    } catch (error) {
+      console.error('Error fetching posts with pagination:', error);
+      throw new Error('Failed to fetch paginated posts');
+    }
+  }
+
+  async findPostWithComments(postId: number) {
+    // Can reference here of how to use "findMany()" 
+    const result = await this.conn.query.posts.findMany(
+      {
+        where: eq(posts.post_id, postId), //eq refers equals
+        with: {
+          comments: true, // Include comments relation
+        },
+      }
+    );
+
+    // Transformations
+    const postsWithComments = result.map(
+      (post) => (
+        {
+          id: post.post_id,
+          title: post.title,
+          content: post.content,
+          comments: post.comments.map(
+            (comment) => (
+              {
+                id: comment.com_id,
+                content: comment.content,
+              }
+            )
+          ),
+        }
+      )
+    );
+    return postsWithComments;
+  }
+
+
   // Find one blog post by ID
   async findOne(id: number) {
     const post = await this.conn.query.posts.findFirst({
-      where: (posts, { eq }) => eq(posts.id, id),
+      where: (posts, { eq }) => eq(posts.post_id, id),
     });
     if (!post) {
       throw new NotFoundException(`Blog post with ID ${id} not found`);
@@ -48,7 +105,7 @@ export class BlogPostsService {
   async update(id: number, updateBlogPostDto: UpdateBlogpostDto, user: any) {
     // Find the post first
     const post = await this.conn.query.posts.findFirst({
-      where: (posts, { eq }) => eq(posts.id, id),
+      where: (posts, { eq }) => eq(posts.post_id, id),
     });
 
     if (!post) {
@@ -68,7 +125,7 @@ export class BlogPostsService {
           ...(title && { title }),
           ...(content && { content }),
         })
-        .where(eq(posts.id, id))
+        .where(eq(posts.post_id, id))
         .returning();
 
       return result;
@@ -82,7 +139,7 @@ export class BlogPostsService {
   async remove(id: number, user: any) {
     // Find the post first
     const post = await this.conn.query.posts.findFirst({
-      where: (posts, { eq }) => eq(posts.id, id),
+      where: (posts, { eq }) => eq(posts.post_id, id),
     });
 
     if (!post) {
@@ -95,7 +152,7 @@ export class BlogPostsService {
     }
 
     try {
-      await this.conn.delete(posts).where(eq(posts.id, id));
+      await this.conn.delete(posts).where(eq(posts.post_id, id));
       return { message: `Blog post with ID ${id} deleted` };
     } catch (error) {
       console.error('Error deleting blog post:', error);

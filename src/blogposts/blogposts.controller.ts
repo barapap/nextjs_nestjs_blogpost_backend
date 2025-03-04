@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Delete, Param, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Delete, Param, UseGuards, Request, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { BlogPostsService } from './blogposts.service';
 import { CreateBlogpostDto } from './dto/create-blogpost.dto';
@@ -12,6 +12,20 @@ export class BlogPostsController {
   @Get()
   async findAll() {
     return this.blogPostsService.findAll();
+  }
+
+  @Get()
+  async findAllByPage(@Query('page') page: number = 1) {
+    const limit = 5; // Set the number of posts per page
+    const offset = (page - 1) * limit;
+    return this.blogPostsService.findPaginated(offset, limit);
+  }
+
+  // Get one posts with associated comments
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findPostWithComments(@Param('id') id: number) {
+    return this.blogPostsService.findPostWithComments(id);
   }
 
   // Get a single blog post by ID

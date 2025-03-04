@@ -30,7 +30,7 @@ export class UsersService {
   // Find one user by ID
   async findOne(id: number) {
     const user = await this.conn.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
+      where: (users, { eq }) => eq(users.user_id, id),
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -47,7 +47,7 @@ export class UsersService {
         ...(email && { email }),
         ...(password && { password }),
       })
-      .where(eq(users.id, id));
+      .where(eq(users.user_id, id));
     if (result.rowsAffected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -57,7 +57,7 @@ export class UsersService {
   // Remove user by ID
   async remove(id: number) {
     const result = await this.conn.delete(users)
-      .where(eq(users.id, id));
+      .where(eq(users.user_id, id));
     if (result.rowsAffected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }

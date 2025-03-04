@@ -29,15 +29,26 @@ export class PostcommentsService {
     }
   }
 
-  // Find all comments
+  // Find all comments for all posts
   async findAll() {
     return await this.conn.query.blogcomments.findMany();
   }
 
-  // Find one comment by ID
+    // Find all comments by post ID
+  async findCommentsForPost(id: number) {
+    const comment = await this.conn.query.blogcomments.findMany({
+      where: (comments, { eq }) => eq(comments.post_id, id),
+    });
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${id} not found`);
+    }
+    return comment;
+  }
+
+  // Find one comment by comment ID
   async findOne(id: number) {
     const comment = await this.conn.query.blogcomments.findFirst({
-      where: (comments, { eq }) => eq(comments.id, id),
+      where: (comments, { eq }) => eq(comments.com_id, id),
     });
     if (!comment) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
@@ -52,7 +63,7 @@ export class PostcommentsService {
       .set({
         ...(content && { content }),
       })
-      .where(eq(blogcomments.id, id));
+      .where(eq(blogcomments.com_id, id));
     if (result.rowsAffected === 0) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
@@ -62,7 +73,7 @@ export class PostcommentsService {
   // Remove comment by ID
   async remove(id: number) {
     const result = await this.conn.delete(blogcomments)
-      .where(eq(blogcomments.id, id));
+      .where(eq(blogcomments.com_id, id));
     if (result.rowsAffected === 0) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }

@@ -9,10 +9,16 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 export class PostCommentsController {
   constructor(private readonly postCommentsService: PostcommentsService) {}
 
-  // Get all comments
+  // // Get all comments
+  // @Get()
+  // async findAll() {
+  //   return this.postCommentsService.findAll();
+  // }
+
+  // Get all comment by a post ID
   @Get()
-  async findAll() {
-    return this.postCommentsService.findAll();
+  async findCommentsForPost(@Param('postId') id: number) {
+    return this.postCommentsService.findCommentsForPost(id);
   }
 
   // Get a comment by ID
