@@ -57,37 +57,31 @@ export class BlogPostsService {
     }
   }
 
-  async findPostWithComments(postId: number) {
-    // Can reference here of how to use "findMany()" 
-    const result = await this.conn.query.posts.findMany(
-      {
-        where: eq(posts.post_id, postId), //eq refers equals
-        with: {
-          comments: true, // Include comments relation
-        },
-      }
-    );
+  async findPostWithComments(postId: number) { 
+  const post = await this.conn.query.posts.findFirst({
+    where: eq(posts.post_id, postId),
+    with: {
+      comments: true, // Include comments relation
+    },
+  });
 
-    // Transformations
-    const postsWithComments = result.map(
-      (post) => (
-        {
-          id: post.post_id,
-          title: post.title,
-          content: post.content,
-          comments: post.comments.map(
-            (comment) => (
-              {
-                id: comment.com_id,
-                content: comment.content,
-              }
-            )
-          ),
-        }
-      )
-    );
-    return postsWithComments;
-  }
+  if (!post) return null; // Handle the case where the post doesn't exist
+
+  // Transformations
+  return {
+    post_id: post.post_id,
+    title: post.title,
+    content: post.content,
+    author_id: post.author_id, // Ensure this matches the frontend
+    created_at: post.created_at,
+    comments: post.comments.map(comment => ({
+      com_id: comment.com_id,
+      content: comment.content,
+      user_id: comment.user_id, // Ensure this matches the frontend
+    })),
+  };
+}
+
 
 
   // Find one blog post by ID

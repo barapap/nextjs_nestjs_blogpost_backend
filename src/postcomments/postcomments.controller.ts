@@ -17,8 +17,8 @@ export class PostCommentsController {
 
   // Get all comment by a post ID
   @Get()
-  async findCommentsForPost(@Param('postId') id: number) {
-    return this.postCommentsService.findCommentsForPost(id);
+  async findAllForOnePost(@Param('postId') id: number) {
+    return this.postCommentsService.findAllForOnePost(id);
   }
 
   // Get a comment by ID

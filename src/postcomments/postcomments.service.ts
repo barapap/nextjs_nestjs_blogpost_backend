@@ -34,13 +34,13 @@ export class PostcommentsService {
     return await this.conn.query.blogcomments.findMany();
   }
 
-    // Find all comments by post ID
-  async findCommentsForPost(id: number) {
+  // Find all comments by post ID
+  async findAllForOnePost(id: number) {
     const comment = await this.conn.query.blogcomments.findMany({
       where: (comments, { eq }) => eq(comments.post_id, id),
     });
     if (!comment) {
-      throw new NotFoundException(`Comment with ID ${id} not found`);
+      throw new NotFoundException(`No comments found for Post ${id}`);
     }
     return comment;
   }
