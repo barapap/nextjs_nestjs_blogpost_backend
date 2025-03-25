@@ -21,12 +21,6 @@ export class BlogPostsController {
     return this.blogPostsService.findPostWithComments(id);
   }
 
-  // Get one post by ID
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.blogPostsService.findOne(id);
-  }
-
   // Create a new blog post (Protected Route using JwtAuthGuard)
   @UseGuards(JwtAuthGuard)
   @Post()

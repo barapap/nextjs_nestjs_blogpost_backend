@@ -50,10 +50,10 @@ export class BlogPostsService {
     const post = await this.conn.query.posts.findFirst({
       where: eq(posts.post_id, postId),
       with: {
-        // Include comments relation (from schema foreign key)
+        // from schema relation, foreign key of table posts
         comments: {
           with:{
-            // Include the user (author) data for each comment (from foreign key)
+            // from schema relation, foreign key of table blogcomments
             user: true,
           }
         }
@@ -62,31 +62,23 @@ export class BlogPostsService {
 
     if (!post) return null; // Handle the case where the post doesn't exist
 
+    const post_author = await this.getPostWithAuthor(postId);
+
     // Transformations
     return {
       post_id: post.post_id,
       title: post.title,
       content: post.content,
       author_id: post.author_id, // Should match the frontend
+      author_username: post_author.authorUsername || "Unknown", // Should match the frontend
       created_at: post.created_at,
       comments: post.comments.map(comment => ({
         com_id: comment.com_id,
         content: comment.content,
         user_id: comment.user_id, // Should match the frontend
-        author_username: comment.user.username || "Unknown", // Should match the frontend
+        com_username: comment.user.username || "Unknown", // Should match the frontend
       })),
     };
-  }
-
-  // Find one blog post by ID
-  async findOne(id: number) {
-    const post = await this.conn.query.posts.findFirst({
-      where: (posts, { eq }) => eq(posts.post_id, id),
-    });
-    if (!post) {
-      throw new NotFoundException(`Blog post with ID ${id} not found`);
-    }
-    return post;
   }
 
   // Update blog post by ID
