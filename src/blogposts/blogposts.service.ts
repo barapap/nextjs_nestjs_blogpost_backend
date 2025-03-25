@@ -33,56 +33,50 @@ export class BlogPostsService {
     return await this.conn.query.posts.findMany();
   }
 
-  // Find all posts with pagination
-  async findPaginated(offset: number, limit: number) {
-    try {
-      // Fetch the paginated posts
-      const posts = await this.conn.query.posts.findMany({
-        // Use limit and offset directly for pagination
-        limit: limit, // Limit the number of posts per page
-        offset: offset, // Skip a number of records to apply offset
-      });
+  async getPostWithAuthor(postId: number) {
+    const post = await this.conn.query.posts.findFirst({ where: eq(posts.post_id, postId) });
+    if (!post) throw new NotFoundException('Post not found');
 
-      // Fetch the total number of posts for pagination
-      const totalPosts = await this.conn.query.posts.findMany(); // Fetch all posts to count them
-      const totalPages = Math.ceil(totalPosts.length / limit); // Calculate total pages
+    // use "schema" because use the "acuan" from schema to search in "conn"
+    const author = await this.conn.query.users.findFirst({ where: eq(schema.users.user_id, post.author_id) });
 
-      return {
-        posts,
-        totalPages,
-      };
-    } catch (error) {
-      console.error('Error fetching posts with pagination:', error);
-      throw new Error('Failed to fetch paginated posts');
-    }
+    return {
+      ...post,
+      authorUsername: author ? author.username : "Unknown",
+    };
   }
 
   async findPostWithComments(postId: number) { 
-  const post = await this.conn.query.posts.findFirst({
-    where: eq(posts.post_id, postId),
-    with: {
-      comments: true, // Include comments relation
-    },
-  });
+    const post = await this.conn.query.posts.findFirst({
+      where: eq(posts.post_id, postId),
+      with: {
+        // Include comments relation (from schema foreign key)
+        comments: {
+          with:{
+            // Include the user (author) data for each comment (from foreign key)
+            user: true,
+          }
+        }
+      },
+    });
 
-  if (!post) return null; // Handle the case where the post doesn't exist
+    if (!post) return null; // Handle the case where the post doesn't exist
 
-  // Transformations
-  return {
-    post_id: post.post_id,
-    title: post.title,
-    content: post.content,
-    author_id: post.author_id, // Ensure this matches the frontend
-    created_at: post.created_at,
-    comments: post.comments.map(comment => ({
-      com_id: comment.com_id,
-      content: comment.content,
-      user_id: comment.user_id, // Ensure this matches the frontend
-    })),
-  };
-}
-
-
+    // Transformations
+    return {
+      post_id: post.post_id,
+      title: post.title,
+      content: post.content,
+      author_id: post.author_id, // Should match the frontend
+      created_at: post.created_at,
+      comments: post.comments.map(comment => ({
+        com_id: comment.com_id,
+        content: comment.content,
+        user_id: comment.user_id, // Should match the frontend
+        author_username: comment.user.username || "Unknown", // Should match the frontend
+      })),
+    };
+  }
 
   // Find one blog post by ID
   async findOne(id: number) {

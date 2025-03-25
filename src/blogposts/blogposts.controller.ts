@@ -14,13 +14,6 @@ export class BlogPostsController {
     return this.blogPostsService.findAll();
   }
 
-  @Get()
-  async findAllByPage(@Query('page') page: number = 1) {
-    const limit = 5; // Set the number of posts per page
-    const offset = (page - 1) * limit;
-    return this.blogPostsService.findPaginated(offset, limit);
-  }
-
   // Get one posts with associated comments
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -28,7 +21,7 @@ export class BlogPostsController {
     return this.blogPostsService.findPostWithComments(id);
   }
 
-  // Get a single blog post by ID
+  // Get one post by ID
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.blogPostsService.findOne(id);
